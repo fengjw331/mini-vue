@@ -1,4 +1,5 @@
 
+import { effect } from "../effect";
 import { reactive } from "../reactive"
 
 // it('init',()=>{
@@ -7,7 +8,7 @@ import { reactive } from "../reactive"
 // })
 
 describe('effect',()=>{
-    it.skip('happy end',()=>{
+    it('happy end',()=>{
         let person= reactive({
             age:10
         })
@@ -20,4 +21,19 @@ describe('effect',()=>{
         expect(next).toBe(12)
 
     })
+
+  //runner -> function runner() ->fn ->fn返回值
+    it('happy path ',()=>{
+        let foo=10
+        const fn=()=>{
+            foo++;
+            return 'aoo'
+        }
+        const runner=effect(fn)
+        expect(foo).toBe(11)
+        const r=runner()
+        expect(foo).toBe(12)
+        expect(r).toBe('aoo')
+    })
+
 })
