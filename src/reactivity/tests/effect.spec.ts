@@ -1,5 +1,5 @@
 
-import { effect } from "../effect";
+import { effect,stop } from "../effect";
 import { reactive } from "../reactive"
 
 // it('init',()=>{
@@ -34,6 +34,62 @@ describe('effect',()=>{
         const r=runner()
         expect(foo).toBe(12)
         expect(r).toBe('aoo')
+    })
+
+    it('happy path scheduler',()=>{
+        let dummy;
+        let run:any;
+        const scheduler =jest.fn(()=>{
+            run=runner
+        })
+        const obj=reactive({foo:1})
+        const runner=effect(()=>{
+            dummy=obj.foo
+        },{
+            scheduler
+        })
+
+        expect(scheduler).not.toHaveBeenCalled()
+        expect(dummy).toBe(1)
+        obj.foo++
+        expect(scheduler).toHaveBeenCalledTimes(1)
+        expect(dummy).toBe(1)
+        run()
+        expect(dummy).toBe(2)
+    })
+
+    it("happy path stop",()=>{
+        let dummy
+        const obj=reactive({prop:1})
+        const runner=effect(()=>{
+            dummy=obj.prop
+        })
+        obj.prop=2
+        expect(dummy).toBe(2)
+        stop(runner)
+        obj.prop=3
+        expect(dummy).toBe(2)
+        runner()
+        expect(dummy).toBe(3)
+    })
+
+    it("happy path onstop",()=>{
+        const obj=reactive({
+            foo:1
+        })
+        const onStop=jest.fn()
+        let dummy
+        const runner=effect(
+            ()=>{
+                dummy=obj.foo
+            },
+            {
+                onStop
+            }
+        )
+        stop(runner)
+        expect(onStop).toBeCalledTimes(1)
+
     })
 
 })
