@@ -1,6 +1,8 @@
 import { extend } from "../share"
 
 let activeEffect //存放当前活跃副作用
+let shouldTrack=false
+let effectMap=new Map() //存放所有的依赖
 class ReactiveEffect {
     private _fn: any
     deps=[]
@@ -10,9 +12,16 @@ class ReactiveEffect {
         this._fn=fn
     }
     run(){
-       activeEffect=this
-        
-       return this._fn()
+        if(!this.active){ //stop状态
+            return this._fn()
+        } 
+
+        shouldTrack=true
+        activeEffect=this
+        const result=this._fn()
+        shouldTrack=false
+
+        return result
     }
     stop(){
         if(this.active){
@@ -29,13 +38,8 @@ function cleanupEffect(effect){
     effect.deps.forEach((dep:any)=>{
         dep.delete(effect)
     })
+    effect.deps.length=0
 }
-
-
-let effectMap=new Map() //存放所有的依赖
-//Map:[target:Map:[key,dep]]
-//dep:Set[effect]
-
 
 export function effect(fn,options:any = {}){
     let _effect= new ReactiveEffect(fn,options.scheduler)
@@ -50,8 +54,10 @@ export function stop(runner){
     runner.effect.stop()
 }
 
-
 export function track(target,key){
+    
+    if(!isTracking())return
+
     let depsMap=effectMap.get(target)
     if(!depsMap){
         depsMap=new Map()
@@ -63,10 +69,19 @@ export function track(target,key){
         depsMap.set(key,dep)
     }
 
-    if(!activeEffect)return
+ 
+    if(dep.has(activeEffect))return
     dep.add(activeEffect)
+
     activeEffect.deps.push(dep)
 }
+
+function isTracking(){
+    return shouldTrack &&  activeEffect !==undefined
+}
+
+
+
 
 export function trigger(target,key){
     let depsMap=effectMap.get(target)
