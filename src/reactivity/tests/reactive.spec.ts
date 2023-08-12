@@ -1,4 +1,4 @@
-import { isReactive, isReadOnly, reactive, readOnly } from "../reactive"
+import { isReactive, isReadOnly, reactive, readOnly, shallow } from "../reactive"
 
 describe('reactive',()=>{
     it('happy path',()=>{
@@ -50,5 +50,18 @@ describe('readOnly',()=>{
         let reactiveObj=readOnly(obj)
         expect(isReadOnly(reactiveObj)).toBe(true)
         expect(isReadOnly(reactiveObj.b)).toBe(true)
+    })
+})
+describe('shallow',()=>{
+    it('happy path shallow',()=>{
+        let obj={
+            age:10,
+            b:{
+                c:1
+            }
+        }
+        let reactiveObj=shallow(obj)
+        expect(isReadOnly(reactiveObj)).toBe(true)
+        expect(isReadOnly(reactiveObj.b)).toBe(false)
     })
 })

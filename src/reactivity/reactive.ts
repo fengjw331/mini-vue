@@ -1,4 +1,4 @@
-import { reactiveOption, readOnlyOption } from "./basehandler"
+import { reactiveOption, readOnlyOption,shallowReadonlyOption } from "./basehandler"
 
 export const enum reactiveFlags{
     IS_REACTIVE="__v_is_reactive",
@@ -12,6 +12,10 @@ export function reactive (target){
 
 export function readOnly(target){
    return createProxy(target,readOnlyOption)
+}
+
+export function shallow(target){
+    return createProxy(target,shallowReadonlyOption)
 }
 
 function createProxy(target,options){
