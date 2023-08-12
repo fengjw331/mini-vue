@@ -1,4 +1,4 @@
-import { isReactive, isReadOnly, reactive, readOnly, shallow } from "../reactive"
+import { isProxy, isReactive, isReadOnly, reactive, readOnly, shallow } from "../reactive"
 
 describe('reactive',()=>{
     it('happy path',()=>{
@@ -11,6 +11,7 @@ describe('reactive',()=>{
         obj.age++
         expect(isReactive(reactiveObj)).toBe(true)
         expect(isReactive(obj)).toBe(false)
+        expect(isProxy(reactiveObj)).toBe(true)
     })
 
     it("嵌套",()=>{
@@ -50,6 +51,7 @@ describe('readOnly',()=>{
         let reactiveObj=readOnly(obj)
         expect(isReadOnly(reactiveObj)).toBe(true)
         expect(isReadOnly(reactiveObj.b)).toBe(true)
+        expect(isProxy(reactiveObj)).toBe(true)
     })
 })
 describe('shallow',()=>{
