@@ -3,7 +3,7 @@ import { extend } from "../share"
 let activeEffect //存放当前活跃副作用
 let shouldTrack=false
 let effectMap=new Map() //存放所有的依赖
-class ReactiveEffect {
+export class ReactiveEffect {
     private _fn: any
     deps=[]
     active=true

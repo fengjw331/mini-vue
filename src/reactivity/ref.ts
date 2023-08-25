@@ -5,7 +5,7 @@ import { reactive } from "./reactive";
 class refImpl{
     private _value: any;
     public dep: Set<any>;
-    flag=true
+    __v_isRef=true
     rawValue: any;
     constructor(value){
         this.rawValue=value
@@ -18,17 +18,6 @@ class refImpl{
         return this._value
     }
     set value(newVal){
-        // if(this.flag){//第一次set flag变为false
-        //     this.flag=false
-        //     this._value=newVal
-        //     //trigger()
-        //     triggerEffect(this.dep)
-        // }else if(!Object.is(newVal,this.value)){
-        //     //再次set 值和之前值不同
-        //     this._value=newVal
-        //     //trigger()
-        //     triggerEffect(this.dep)
-        // }
         if(hasChanged(newVal,this.rawValue)){
 
             this.rawValue=newVal
@@ -57,3 +46,27 @@ export function ref(val){
     return new refImpl(val)
 }
 
+export function isRef(val){
+    return !!val.__v_isRef
+}
+
+export function unRef(ref){
+    return  isRef(ref)?ref.value:ref
+}
+
+export function proxyRefs(val){
+    return new Proxy(val,{
+        get(target,key){
+
+            return unRef(Reflect.get(target,key)) 
+        },
+        set(target,key,val){
+            if(isRef(target[key]) && !isRef(val) ){
+                return target[key].value=val
+            }else{
+
+                return Reflect.set(target,key,val)
+            }
+        }
+    })
+}
