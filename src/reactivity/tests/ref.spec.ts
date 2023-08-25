@@ -27,4 +27,18 @@ describe('ref',()=>{
         expect(dummy).toBe(2)
 
     })
+    it("should properties reactive",()=>{
+        const a=ref({
+            count:1
+        })
+        let dummy
+        effect(()=>{
+            dummy=a.value.count
+        })
+        expect(dummy).toBe(1)
+        a.value.count=2
+        expect(dummy).toBe(2)
+
+
+    })
 })
