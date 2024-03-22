@@ -3,18 +3,18 @@
   "version": "1.0.0",
   "main": "index.js",
   "repository": "git@github.com:fengjw331/mini-vue.git",
-  "author": "fightaa <fengdeninan331@sohu.com>",
+  "author": "fightaa <641479114@qq.com>",
   "license": "MIT",
   "scripts": {
     "test": "jest"
   },
   "devDependencies": {
-    "@babel/core": "^7.18.6",
-    "@babel/preset-env": "^7.18.6",
-    "@babel/preset-typescript": "^7.18.6",
-    "@types/jest": "^28.1.5",
-    "babel-jest": "^28.1.3",
-    "jest": "^28.1.3",
-    "typescript": "^4.7.4"
+    "@babel/core": "^7.24.3",
+    "@babel/preset-env": "^7.24.3",
+    "@babel/preset-typescript": "^7.24.1",
+    "@types/jest": "^29.5.12",
+    "babel-jest": "^29.7.0",
+    "jest": "^29.7.0",
+    "typescript": "^5.4.3"
   }
 }

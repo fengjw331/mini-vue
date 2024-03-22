@@ -1,27 +1,20 @@
-import { extend } from "../share"
+import { extend } from "../shared/index";
 
-let activeEffect //存放当前活跃副作用
-let shouldTrack=false
-let effectMap=new Map() //存放所有的依赖
-export class ReactiveEffect {
+let targetMap=new Map()
+let activeEffect;
+class ReactiveEffect {
     private _fn: any
     deps=[]
     active=true
-    onStop?:()=>void
+    onStop?:()=>void;
     constructor(fn,public scheduler?){
         this._fn=fn
     }
     run(){
-        if(!this.active){ //stop状态
-            return this._fn()
-        } 
-
-        shouldTrack=true
         activeEffect=this
-        const result=this._fn()
-        shouldTrack=false
-
-        return result
+        // fn 作为副作用 必定会触发get 触发track 收集依赖
+        return this._fn()
+        
     }
     stop(){
         if(this.active){
@@ -31,6 +24,7 @@ export class ReactiveEffect {
             }
             this.active=false
         }
+       
     }
 }
 
@@ -38,11 +32,10 @@ function cleanupEffect(effect){
     effect.deps.forEach((dep:any)=>{
         dep.delete(effect)
     })
-    effect.deps.length=0
 }
 
-export function effect(fn,options:any = {}){
-    let _effect= new ReactiveEffect(fn,options.scheduler)
+export  function effect(fn,options:any={}){
+    const _effect=new ReactiveEffect(fn,options.scheduler)
     extend(_effect,options)
     _effect.run()
     const runner:any=_effect.run.bind(_effect)
@@ -54,53 +47,37 @@ export function stop(runner){
     runner.effect.stop()
 }
 
-export function track(target,key){
-    
-    if(!isTracking())return
 
-    let depsMap=effectMap.get(target)
+export function Track(target,key){
+    //target->key->fn
+    let  depsMap=targetMap.get(target)
     if(!depsMap){
         depsMap=new Map()
-        effectMap.set(target,depsMap)
+        targetMap.set(target,depsMap)
     }
     let dep=depsMap.get(key)
     if(!dep){
         dep=new Set()
         depsMap.set(key,dep)
     }
-
-    trackEffect(dep)
-}
-
-export function trackEffect(dep){
-
-    if(dep.has(activeEffect))return
+    if(!activeEffect)return
+    //dep 收集 fn
     dep.add(activeEffect)
-
+    //fn 反向收集dep
     activeEffect.deps.push(dep)
 }
 
+export function Trigger(target,key){
+     let depsMap=targetMap.get(target)
 
+     let  dep=depsMap.get(key)
 
-
-export function isTracking(){
-    return shouldTrack &&  activeEffect !==undefined
-}
-
-
-export function trigger(target,key){
-    let depsMap=effectMap.get(target)
-    let dep=depsMap.get(key)
-    triggerEffect(dep)
-}
-
-export function triggerEffect(dep){
-    for (const effect of dep) {
+     for (const effect of dep) {
         if(effect.scheduler){
             effect.scheduler()
         }else{
             effect.run()
         }
-            
-    }
+     }
+
 }

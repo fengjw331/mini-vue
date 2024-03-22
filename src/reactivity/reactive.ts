@@ -1,35 +1,23 @@
-import { reactiveOption, readOnlyOption,shallowReadonlyOption } from "./basehandler"
-
-export const enum reactiveFlags{
-    IS_REACTIVE="__v_is_reactive",
-    IS_READONLY="__v_is_readonly",
-}
+import { Track, Trigger } from "./effect"
 
 
-export function reactive (target){
-  return createProxy(target,reactiveOption)
-}
 
-export function readOnly(target){
-   return createProxy(target,readOnlyOption)
-}
 
-export function shallow(target){
-    return createProxy(target,shallowReadonlyOption)
-}
-
-function createProxy(target,options){
-    const proxy= new Proxy(target,options)
-    return proxy
-}
-
-export function isReactive(value){
-    return !!value[reactiveFlags.IS_REACTIVE]
-}
-
-export function isReadOnly(value){
-    return  !!value[reactiveFlags.IS_READONLY]
-}
-export function isProxy(value){
-    return isReactive(value) || isReadOnly(value)
+export  function reactive(raw){
+    return new Proxy(raw,{
+        get(target,key){
+            const res=Reflect.get(target,key)
+            //依赖收集
+            console.log('get track')
+            Track(target,key)
+            return res
+        },
+        set(target,key,value){
+            const res=Reflect.set(target,key,value)
+            //触发依赖
+            console.log('set trigger')
+            Trigger(target,key)
+            return res
+        }
+    })
 }
