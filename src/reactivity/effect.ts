@@ -69,9 +69,8 @@ export function Track(target,key){
 
 export function Trigger(target,key){
      let depsMap=targetMap.get(target)
-
      let  dep=depsMap.get(key)
-
+     
      for (const effect of dep) {
         if(effect.scheduler){
             effect.scheduler()

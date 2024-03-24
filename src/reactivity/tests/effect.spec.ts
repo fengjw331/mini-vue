@@ -26,7 +26,6 @@ describe("effect",()=>{
         const r=runner()
         expect(foo).toBe(12)
         expect(r).toBe('foo')
-
     })
 
     it('scheduler',()=>{
@@ -49,7 +48,6 @@ describe("effect",()=>{
         expect(dummy).toBe(1)
         run()
         expect(dummy).toBe(2)
-
     })
 
     it("stop",()=>{
@@ -84,7 +82,6 @@ describe("effect",()=>{
         )
         stop(runner)
         expect(onStop).toHaveBeenCalledTimes(1)   
-
     })
 
 
