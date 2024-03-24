@@ -1,7 +1,7 @@
 import { extend } from "../shared/index";
 
 let targetMap=new Map()
-let activeEffect;
+let activeEffect,shouldTrack;
 class ReactiveEffect {
     private _fn: any
     deps=[]
@@ -11,10 +11,16 @@ class ReactiveEffect {
         this._fn=fn
     }
     run(){
+        if(!this.active){
+            //stop状态  active->false
+            return this._fn()
+        }
+        shouldTrack=true
         activeEffect=this
         // fn 作为副作用 必定会触发get 触发track 收集依赖
-        return this._fn()
-        
+        const result= this._fn()
+        shouldTrack=false
+        return result
     }
     stop(){
         if(this.active){
@@ -32,6 +38,7 @@ function cleanupEffect(effect){
     effect.deps.forEach((dep:any)=>{
         dep.delete(effect)
     })
+    effect.deps.length=0
 }
 
 export  function effect(fn,options:any={}){
@@ -49,6 +56,7 @@ export function stop(runner){
 
 
 export function Track(target,key){
+    if(!isTracking())return
     //target->key->fn
     let  depsMap=targetMap.get(target)
     if(!depsMap){
@@ -60,11 +68,16 @@ export function Track(target,key){
         dep=new Set()
         depsMap.set(key,dep)
     }
-    if(!activeEffect)return
+    
+    if(dep.has(activeEffect))return
     //dep 收集 fn
     dep.add(activeEffect)
     //fn 反向收集dep
     activeEffect.deps.push(dep)
+}
+
+function isTracking(){
+    return shouldTrack && activeEffect !==undefined
 }
 
 export function Trigger(target,key){
